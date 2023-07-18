@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn</title>
+    <style>
+     
+        #close1{
+         /*   display: none;/* display none is used to hide the element and to  hide the space as well*/
+            position: relative;
+            top: 40px;
+            border: 2px solid brown;
+            background-color: #eedc6d;
+            height: 160px;
+            z-index: 90;
+            /*whose z-index value is greater will show above on another*/
+             /* z-index is only applicable when the position is absolute,relative,sticky and fixed*/
+        }
+        #close2{
+          /*  visibility: hidden;/*it will use to hide only the elemnt not to space*/
+        
+        /* position: fixed;*/
+            border: 2px solid brown;
+            background-color: #6fee8c;
+            height: 130px;
+          /* z-index: 28; */
+        }
+        .container{
+            border: 2px solid green;
+            margin: 20px 10px;
+           
+            height: 300px;
+            
+            display: flex;
+            /*flex direction properties*/
+         /*   flex-direction: row;
+            flex-direction: column;
+            flex-direction: column-reverse;
+            flex-direction: row-reverse;*/
+            flex-direction: row;
+           flex-wrap: wrap;
+         /* flex-wrap: wrap-reverse;*/
+          /*flex flow for both flex direction and flex wrap*/
+         /* flex-flow:column  wrap ;*/
+       
+        /*  justify-content: center;*/
+         /* justify-content: space-between;*/
+        /* justify-content: space-around;
+         justify-content: space-evenly;*/
+
+       /*  align-items: center;
+         align-items: flex-end;
+         align-items: flex-start;
+         align-items: end;
+         align-items: stretch;*/
+          
+
+
+
+        }
+        .class1{
+            border: 2px solid black;
+            margin: 20px 10px;
+            padding: 2px 3px;
+            height: 50px;
+            width: 50px;
+        }
+        #a-1{
+            order: 30; /*higher order later will show*/
+        }
+        #a-2{
+        /*   flex-grow: 3;*/
+        align-self: center;
+        align-self: flex-end;
+        align-self: flex-start;
+        }
+        #a-3{
+           /* flex-grow: 4;*/
+         /*   flex-shrink: 2;*/
+            flex-basis: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="open" id="close1">
+          First box
+    </div>
+    <div class="open" id="close2">
+         Second box
+    </div>
+
+    
+
+    <div class="container">
+       
+        <div class="class1" id="a-1">you are sweet</div>
+        <div class="class1" id="a-2">you are nice</div>
+        <div class="class1" id="a-3">you are gud</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn</title>
+    <style>
+        #head {
+            background-color: rgb(123, 123, 221);
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .box {
+            background-color: bisque;
+            font-size: 60px;
+            text-align: center;
+            display: none;
+
+        }
+
+        @media (max-width:300px) and (min-width:100px) {
+            #box1 {
+
+                display: block;
+                background-color: green;
+            }
+        }
+
+        @media (max-width:500px) and (min-width:300px) {
+            #box2 {
+
+                display: block;
+                background-color: rgb(241, 241, 19);
+            }
+        }
+
+        @media (max-width:700px) and (min-width:500px) {
+            #box3 {
+
+                display: block;
+                background-color: rgb(243, 92, 222);
+            }
+        }
+
+        @media (min-width:800px) {
+            #box4 {
+
+                display: block;
+                background-color: rgb(178, 74, 231);
+            }
+        }
+
+        div+p {
+            color: rgb(239, 115, 142);
+        }
+
+        div li {
+            background-color: aquamarine;
+        }
+
+        span>p {
+            background-color: yellow;
+        }
+        a[target]{
+            font-size: 40px;
+            color: lightgreen;
+        }
+        input[type="text"]{
+            color: aqua;
+        }
+      /*  li:nth-child(5){
+            color: pink;
+        }
+        li:nth-child(2){
+            color: red;
+        }*/
+        li:nth-child(odd){
+            color: yellow;
+        }
+        li:nth-child(odd){
+            color: rgb(98, 236, 158);
+        }
+    </style>
+</head>
+
+<body>
+    <h3 id="head">
+        Meadia Queries
+    </h3>
+    <div class="box" id="box1">Green</div>
+    <div class="box" id="box2">Yellow</div>
+    <div class="box" id="box3">Pink</div>
+    <div class="box" id="box4">lavendor</div>
+
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem nostrum, sed minima aperiam maiores
+        cupiditate nobis et perferendis vero ut ad tenetur beatae facere nesciunt nisi nulla dolorem. Distinctio, illo.
+    </p>
+
+    <div>
+        <span>
+            <p>
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nisi labore dicta eaque quia error excepturi
+                consequatur, quas, repellat nulla fuga nostrum sint, magni illum recusandae inventore numquam maiores
+                autem! Dolores, architecto. Magni voluptatem, pariatur quo quibusdam vitae delectus optio accusamus.
+                <li>
+                    hjgtyuy
+                </li>
+            
+
+            </p>
+        </span>
+    </div>
+    <a href="google.com" target="_blank">Google</a>
+
+    <form action="backend.php">
+        <ul>
+            <li>
+                <input type="text" value="Enter your name">
+                <input type="el" value="Enter contact number">
+            </li>
+        </ul>
+    </form>
+
+    <ul>
+        <li class="row" id="row1">yes</li>
+        <li class="row" id="row2">no</li>
+        <li class="row" id="row3">true</li>
+        <li class="row" id="row4">false</li>
+        <li class="row" id="row5">left</li>
+        <li class="row" id="row6">right</li>
+    </ul>
+</body>
+
+</html>

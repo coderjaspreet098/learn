@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Project</title>
+    <style>
+    .navigation{
+        display: flex;
+        font-size: 20px;
+        font: bold;
+       
+        
+        
+    }
+    li {
+       list-style: none;
+       
+        
+    }
+    li a{
+        text-decoration: none;
+        margin: 10px 20px;
+        padding: 5px  5px;
+    }
+   
+    header::before{
+        content:"";
+        background-image: url('https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1530&q=80');
+        background-repeat: no-repeat;
+        background-size: cover;
+        top: 0px;
+        left: 0px;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.8;
+        
+    }
+    section{
+        display: flex;
+        flex-direction: column;
+      
+       
+        height:300px;
+           
+    margin-top: 10px;
+    margin-left: 140px;
+        
+   
+       
+    }
+     form{
+        display: flex;
+        flex-direction: column;
+       width: 300px;
+       padding:20px 20px ;
+    
+       
+        border-radius: 2px;
+        
+     }
+    
+    input{
+       border-radius: 8px;
+       margin: 5px 10px;
+    }
+    .submit{
+        border-radius: 8px;
+        width: 250px;
+        align-self: center;
+        margin: 50px auto;
+        background-color: aqua;
+    }
+    .red{
+        margin-left: 100px;
+    }
+
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <ul class="navigation">
+                <li class="list" id="list1"><a href="">Home</a></li>
+                <li class="list" id="list2"><a href="">About</a></li>
+                <li class="list" id="list3"><a href="">service</a></li>
+                <li class="list" id="list4"><a href="">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section>
+        <h1 class="red">Login Here</h1>
+        <form action="">
+            
+            <input type="text" value="Enter your name">
+            <input type="text" value="Enter valid mobile no.">
+            <input type="email" value="Enter your Email">
+            <button class="submit">Submit</button>
+        </form>
+
+        
+    </section>
+</body>
+</html>

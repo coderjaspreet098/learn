@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>learn</title>
+    <style>
+    :root{
+        /*it works like global variable*/
+        --low-color:rgb(143, 235, 149);
+
+    }
+      .clasp{
+        
+        border: 2px solid red;
+        margin: 20px 20px;
+        padding: 5px 5px;
+        background-color: rgb(159, 237, 202);
+        /* box-shadow: offset-x offset-y blur color*/
+        box-shadow: 11px 10px 2px #e2b1b1;
+        /* box-shadow:  inset offset-x offset-y blur color*/
+      /*  box-shadow:inset 11px 10px 2px #e2b1b1;  inset is for the inner side shadow*/
+      }
+      .clasp h3{
+        text-shadow: -2px -3px burlywood;
+      }
+      .room{
+        /*it works like local variable*/
+        --high-color:pink;
+        border: 2px solid var(--low-color);
+        background-color: var(--high-color);
+      }
+      .little{
+        border: 2px solid lightblue;
+        height: 240px;
+        width: 240px;
+        margin: 10px 10px;
+        padding: 5px 10px;
+        background-color: var(--low-color);
+       /* animation-name: jass;
+        animation-duration: 3s;
+        animation-iteration-count: infinite;
+        animation-direction: reverse;*/
+         position: relative;
+        animation-name: jass1;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+
+      }
+      @keyframes jass1{
+        0%{
+            top: 0px;
+            left: 0px;
+        }
+        20%{
+            top:400px;
+            left:0px;
+        }
+        40%{
+            top:400px;
+            left:300px
+        }
+        100%{
+            top:0px;
+            left:300px;
+        }
+      }
+    /*  @keyframes jass{
+        from{
+            width:300px
+        }
+        to{
+            width:500px
+        }
+      }*/
+    </style>
+</head>
+<body>
+    <div class="clasp" id="class1">
+ <h3>
+    My Introduction
+ </h3>
+ <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, nesciunt, et eius, a ipsum fuga voluptates inventore ut placeat temporibus sit assumenda molestiae! Magni consectetur cumque asperiores! Debitis consequatur magni tenetur ab in consectetur ipsa velit voluptas et! Velit, illum?</p>
+    </div>
+
+    <div class="room" id="red">
+        My self
+    </div>
+    <div class="little" id="little1">
+        I m a box for animation
+    </div>
+</body>
+</html>

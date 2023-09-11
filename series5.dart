@@ -37,6 +37,20 @@ class _PostModelState extends State<PostModel> {
       title: 'Post 2',
       description: 'This is the second post.',
     ),
+    Post(
+      id: '3',
+      imageUrl: NetworkImage(
+          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'), // Replace with the URL of your third image
+      title: 'Post 3',
+      description: 'This is the third post.',
+    ),
+    Post(
+      id: '4',
+      imageUrl: NetworkImage(
+          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'), // Replace with the URL of your fourth image
+      title: 'Post 4',
+      description: 'This is the fourth post.',
+    ),
     // Add more posts here
   ];
 
@@ -49,20 +63,16 @@ class _PostModelState extends State<PostModel> {
         ),
         body: ListView(
           children: [
-            Column(
-              children: [
-                GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                  ),
-                  itemCount: posts.length,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (ctx, index) {
-                    return buildPostCard(posts[index]);
-                  },
-                ),
-              ],
+            GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+              ),
+              itemCount: posts.length,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (ctx, index) {
+                return buildPostCard(posts[index]);
+              },
             ),
           ],
         ),
@@ -75,11 +85,11 @@ class _PostModelState extends State<PostModel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image(
-            image: post.imageUrl,
-            fit: BoxFit.cover,
-            height: 150,
-            width: double.infinity,
+          Expanded( // Add this Expanded widget
+            child: Image(
+              image: post.imageUrl,
+              fit: BoxFit.cover,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -109,4 +119,5 @@ class _PostModelState extends State<PostModel> {
     );
   }
 }
+
 

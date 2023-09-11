@@ -1,118 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'dart:io';
 
+class Post {
+  final String id;
+  final ImageProvider<Object> imageUrl;
+  final String title;
+  final String description;
+  bool isLiked;
 
-class Imagecropper extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    return  ImagePickerWidget();
-  }
+  Post({
+    required this.id,
+    required this.imageUrl,
+    required this.title,
+    required this.description,
+    this.isLiked = false,
+  });
 }
 
-
-class ImagePickerWidget extends StatefulWidget {
+class PostModel extends StatefulWidget {
   @override
-  _ImagePickerWidgetState createState() => _ImagePickerWidgetState();
+  _PostModelState createState() => _PostModelState();
 }
 
-class _ImagePickerWidgetState extends State<ImagePickerWidget> {
-  File? _image;
-//_getImageFromCamera
-  Future _getImageFromCamera() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.camera);
-    if (image != null) {
-      final croppedImage = await ImageCropper().cropImage(
-        sourcePath: image.path,
-        aspectRatioPresets: [
-          CropAspectRatioPreset.square,
-          CropAspectRatioPreset.ratio3x2,
-          CropAspectRatioPreset.original,
-          CropAspectRatioPreset.ratio4x3,
-          CropAspectRatioPreset.ratio16x9,
-        ],
-        uiSettings:[ AndroidUiSettings(
-          toolbarTitle: 'Crop Image',
-          toolbarColor: Colors.blue,
-          toolbarWidgetColor: Colors.white,
-          statusBarColor: Colors.blue,
-          backgroundColor: Colors.white,
-        ),
-          IOSUiSettings(
-            title: 'Crop Image',
-            aspectRatioLockEnabled: false,
-          ),],
-      );
-      if (croppedImage != null) {
-        setState(() {
-          _image = File(croppedImage.path);
-        });
-      }
-    }
-  }
-
-  Future _getImageFromGallery() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      final croppedImage = await ImageCropper().cropImage(
-        sourcePath: image.path,
-        aspectRatioPresets: [
-          CropAspectRatioPreset.square,
-          CropAspectRatioPreset.ratio3x2,
-          CropAspectRatioPreset.original,
-          CropAspectRatioPreset.ratio4x3,
-          CropAspectRatioPreset.ratio16x9,
-        ],
-        uiSettings:[ AndroidUiSettings(
-          toolbarTitle: 'Crop Image',
-          toolbarColor: Colors.blue,
-          toolbarWidgetColor: Colors.white,
-          statusBarColor: Colors.blue,
-          backgroundColor: Colors.white,
-        ),
-          IOSUiSettings(
-            title: 'Crop Image',
-            aspectRatioLockEnabled: false,
-          ),],
-      );
-
-      if (croppedImage != null) {
-        setState(() {
-          _image = File(croppedImage.path);
-        });
-      }
-    }
-  }
+class _PostModelState extends State<PostModel> {
+  final List<Post> posts = [
+    Post(
+      id: '1',
+      imageUrl: NetworkImage(
+          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'),
+      title: 'Post 1',
+      description: 'This is the first post.',
+    ),
+    Post(
+      id: '2',
+      imageUrl: NetworkImage(
+          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'),
+      title: 'Post 2',
+      description: 'This is the second post.',
+    ),
+    // Add more posts here
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: Text('Image Picker and Cropper',)
-      ),
-      body: Center(
-        child: Column(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Posts'),
+        ),
+        body: ListView(
           children: [
-            if (_image != null)
-              Image.file(
-                _image!,
-                height: 200,
-                width: 200,
-                fit: BoxFit.cover,
-              ),
-            SizedBox(height: 40,),
-            ElevatedButton(
-              onPressed: _getImageFromCamera,
-              child: Text("Pick Image from Camera"),
-            ),
-            ElevatedButton(
-              onPressed: _getImageFromGallery,
-              child: Text("Pick Image from Gallery"),
+            Column(
+              children: [
+                GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                  ),
+                  itemCount: posts.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (ctx, index) {
+                    return buildPostCard(posts[index]);
+                  },
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget buildPostCard(Post post) {
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Image(
+            image: post.imageUrl,
+            fit: BoxFit.cover,
+            height: 150,
+            width: double.infinity,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              post.title,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(post.description),
+          ),
+          IconButton(
+            icon: Icon(
+              post.isLiked ? Icons.favorite : Icons.favorite_border,
+              color: post.isLiked ? Colors.red : null,
+            ),
+            onPressed: () {
+              // Toggle the like status
+              setState(() {
+                post.isLiked = !post.isLiked;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
+

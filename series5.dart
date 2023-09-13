@@ -1,123 +1,89 @@
 import 'package:flutter/material.dart';
 
-class Post {
-  final String id;
-  final ImageProvider<Object> imageUrl;
-  final String title;
-  final String description;
+class PostModel {
+  final String imageUrl;
+  String title;
   bool isLiked;
 
-  Post({
-    required this.id,
-    required this.imageUrl,
-    required this.title,
-    required this.description,
-    this.isLiked = false,
-  });
+  PostModel(this.imageUrl, this.title, this.isLiked);
 }
 
-class PostModel extends StatefulWidget {
+void main() {
+  runApp(MaterialApp(
+    home: GridConcept(),
+  ));
+}
+
+class GridConcept extends StatefulWidget {
+  const GridConcept({Key? key}) : super(key: key);
+
   @override
-  _PostModelState createState() => _PostModelState();
+  _GridConceptState createState() => _GridConceptState();
 }
 
-class _PostModelState extends State<PostModel> {
-  final List<Post> posts = [
-    Post(
-      id: '1',
-      imageUrl: NetworkImage(
-          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'),
-      title: 'Post 1',
-      description: 'This is the first post.',
-    ),
-    Post(
-      id: '2',
-      imageUrl: NetworkImage(
-          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'),
-      title: 'Post 2',
-      description: 'This is the second post.',
-    ),
-    Post(
-      id: '3',
-      imageUrl: NetworkImage(
-          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'), // Replace with the URL of your third image
-      title: 'Post 3',
-      description: 'This is the third post.',
-    ),
-    Post(
-      id: '4',
-      imageUrl: NetworkImage(
-          'https://cdn.pixabay.com/photo/2023/08/31/11/10/dahlia-8224979_1280.jpg'), // Replace with the URL of your fourth image
-      title: 'Post 4',
-      description: 'This is the fourth post.',
-    ),
-    // Add more posts here
+class _GridConceptState extends State<GridConcept> {
+  final List<PostModel> posts = [
+    PostModel('https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg', 'Title 1', false),
+    PostModel('https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg', 'Title 2', false),
+    PostModel('https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg', 'Title 3', false),
   ];
+
+  void toggleLike(int index) {
+    setState(() {
+      posts[index].isLiked = !posts[index].isLiked;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Posts'),
-        ),
-        body: ListView(
-          children: [
-            GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-              ),
-              itemCount: posts.length,
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (ctx, index) {
-                return buildPostCard(posts[index]);
-              },
-            ),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Simple Grid'),
       ),
-    );
-  }
-
-  Widget buildPostCard(Post post) {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded( // Add this Expanded widget
-            child: Image(
-              image: post.imageUrl,
-              fit: BoxFit.cover,
-            ),
+      body: Container(
+        color: Colors.grey,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 15,
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              post.title,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(post.description),
-          ),
-          IconButton(
-            icon: Icon(
-              post.isLiked ? Icons.favorite : Icons.favorite_border,
-              color: post.isLiked ? Colors.red : null,
-            ),
-            onPressed: () {
-              // Toggle the like status
-              setState(() {
-                post.isLiked = !post.isLiked;
-              });
-            },
-          ),
-        ],
+          itemCount: posts.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Stack(
+              children: [
+                Container(
+                  color: Colors.greenAccent,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Image(
+                          image: NetworkImage(posts[index].imageUrl),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Text(posts[index].title),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 70,
+                  child: IconButton(
+                    icon: Icon(
+                      posts[index].isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: posts[index].isLiked ? Colors.red : Colors.black,
+                      size: 30.0,
+                    ),
+                    onPressed: () {
+                      toggleLike(index);
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 }
-
-

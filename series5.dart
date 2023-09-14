@@ -1,88 +1,173 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
+void main() {
+  runApp(MyApp());
+}
 
 class PostModel {
   final String imageUrl;
-  String title;
-  bool isLiked;
+  final String title;
+  final String description;
 
-  PostModel(this.imageUrl, this.title, this.isLiked);
+  PostModel(this.imageUrl, this.title, this.description);
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: GridConcept(),
-  ));
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Grid View Example',
+      home: GridConcept2(),
+    );
+  }
 }
 
-class GridConcept extends StatefulWidget {
-  const GridConcept({Key? key}) : super(key: key);
+class GridConcept2 extends StatefulWidget {
+  const GridConcept2({Key? key}) : super(key: key);
 
   @override
   _GridConceptState createState() => _GridConceptState();
 }
 
-class _GridConceptState extends State<GridConcept> {
-  final List<PostModel> posts = [
-    PostModel('https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg', 'Title 1', false),
-    PostModel('https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg', 'Title 2', false),
-    PostModel('https://cdn.pixabay.com/photo/2023/08/18/15/02/dog-8198719_640.jpg', 'Title 3', false),
-  ];
+class _GridConceptState extends State<GridConcept2> {
+  final List<PostModel> posts = [];
 
-  void toggleLike(int index) {
+  void _addPost(String imageUrl, String title, String description) {
     setState(() {
-      posts[index].isLiked = !posts[index].isLiked;
+      posts.add(PostModel(imageUrl, title, description));
     });
+  }
+
+  Future<void> _openImageSelector(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      String imageUrl = pickedFile.path;
+      String title = '';
+      String description = '';
+
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Container(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        height: 150,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: FileImage(File(imageUrl)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      FloatingActionButton(
+                        onPressed: () {
+                          _openImageSelector(context);
+                        },
+                        child: Icon(Icons.add),
+                      ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            title = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Enter Title',
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            description = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Enter Description',
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (title.isNotEmpty && description.isNotEmpty) {
+                            _addPost(imageUrl, title, description);
+                            Navigator.pop(context); // Close the bottom sheet
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Please fill in all fields.'),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text('Add'),
+                      ),
+                      SizedBox(height: 20),
+
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Simple Grid'),
-      ),
-      body: Container(
-        color: Colors.grey,
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 15,
+        title: Text('Grid View Example'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              _openImageSelector(context);
+            },
           ),
-          itemCount: posts.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Stack(
-              children: [
-                Container(
-                  color: Colors.greenAccent,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Image(
-                          image: NetworkImage(posts[index].imageUrl),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Text(posts[index].title),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 70,
-                  child: IconButton(
-                    icon: Icon(
-                      posts[index].isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: posts[index].isLiked ? Colors.red : Colors.black,
-                      size: 30.0,
-                    ),
-                    onPressed: () {
-                      toggleLike(index);
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
+        ],
+      ),
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
         ),
+        itemCount: posts.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            child: Column(
+              children: [
+                Image(
+                  image: FileImage(File(posts[index].imageUrl)),
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.cover,
+                ),
+                Text(posts[index].title),
+                Text(posts[index].description),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

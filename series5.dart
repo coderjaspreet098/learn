@@ -33,102 +33,121 @@ class GridConcept2 extends StatefulWidget {
 
 class _GridConceptState extends State<GridConcept2> {
   final List<PostModel> posts = [];
+  File? _selectedImage;
+  String title = '';
+  String description = '';
 
   void _addPost(String imageUrl, String title, String description) {
     setState(() {
       posts.add(PostModel(imageUrl, title, description));
+      _selectedImage = null; // Clear selected image after adding a post
     });
+    Navigator.pop(context); // Close the bottom sheet
   }
 
-  Future<void> _openImageSelector(BuildContext context) async {
+  Future<void> _openGallery() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      String imageUrl = pickedFile.path;
-      String title = '';
-      String description = '';
+    try {
+      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedImage != null) {
+        setState(() {
+          _selectedImage = File(pickedImage.path);
+        });
+      }
+    } catch (e) {
+      print("Error picking image: $e");
+    }
+  }
 
-      await showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Container(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
+  void _showBottomSheet() {
+    String tempTitle = '';
+    String tempDescription = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (_selectedImage != null)
                       Container(
                         height: 150,
                         width: 150,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: FileImage(File(imageUrl)),
+                            image: FileImage(_selectedImage!),
                             fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                      FloatingActionButton(
-                        onPressed: () {
-                          _openImageSelector(context);
-                        },
-                        child: Icon(Icons.add),
-                      ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        onChanged: (value) {
-                          setState(() {
-                            title = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Enter Title',
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        onChanged: (value) {
-                          setState(() {
-                            description = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Enter Description',
-                        ),
-                      ),
-                      SizedBox(height: 20),
+                      )
+                    else
                       ElevatedButton(
                         onPressed: () {
-                          if (title.isNotEmpty && description.isNotEmpty) {
-                            _addPost(imageUrl, title, description);
-                            Navigator.pop(context); // Close the bottom sheet
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Please fill in all fields.'),
-                              ),
-                            );
-                          }
+                          _openGallery();
                         },
-                        child: Text('Add'),
+                        child: Text('Select Image'),
                       ),
-                      SizedBox(height: 20),
-
-                    ],
-                  ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      onChanged: (value) {
+                        tempTitle = value;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Enter Title',
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      onChanged: (value) {
+                        tempDescription = value;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Enter Description',
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_selectedImage != null &&
+                            tempTitle.isNotEmpty &&
+                            tempDescription.isNotEmpty) {
+                          _addPost(_selectedImage!.path, tempTitle, tempDescription);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Please fill in all fields and select an image.'),
+                            ),
+                          );
+                        }
+                      },
+                      child: Text('Add'),
+                    ),
+                    SizedBox(height: 20),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-      );
-    }
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      // Reset the selected image and text fields when the bottom sheet closes
+      setState(() {
+        _selectedImage = null;
+        title = '';
+        description = '';
+      });
+    });
   }
 
   @override
@@ -140,7 +159,7 @@ class _GridConceptState extends State<GridConcept2> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              _openImageSelector(context);
+              _showBottomSheet();
             },
           ),
         ],

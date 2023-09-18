@@ -6,7 +6,7 @@ class PostModel {
   final String imageUrl;
   final String title;
   final String description;
-  bool isLiked; // Added a field to track if the post is liked
+  bool isLiked;
 
   PostModel(this.imageUrl, this.title, this.description, {this.isLiked = false});
 }
@@ -37,9 +37,9 @@ class _GridConceptState extends State<GridConcept2> {
   void _addPost(String imageUrl, String title, String description) {
     setState(() {
       posts.add(PostModel(imageUrl, title, description));
-      _selectedImage = null; // Clear selected image after adding a post
+      _selectedImage = null;
     });
-    Navigator.pop(context); // Close the bottom sheet
+    Navigator.pop(context);
   }
 
   Future<void> _openGallery() async {
@@ -66,81 +66,84 @@ class _GridConceptState extends State<GridConcept2> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    if (_selectedImage != null)
-                      Container(
-                        height: 150,
-                        width: 150,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: FileImage(_selectedImage!),
-                            fit: BoxFit.cover,
+          builder: (BuildContext context, StateSetter setState1) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        if (_selectedImage != null)
+                          Container(
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: FileImage(_selectedImage!),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          )
+                        else
+                          ElevatedButton(
+                            onPressed: () {
+                              _openGallery();
+                            },
+                            child: Text('Select Image'),
+                          ),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          onChanged: (value) {
+                            tempTitle = value;
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Enter Title',
                           ),
                         ),
-                      )
-                    else
-                      ElevatedButton(
-                        onPressed: () {
-                          _openGallery();
-                        },
-                        child: Text('Select Image'),
-                      ),
-                    SizedBox(height: 10),
-                    TextFormField(
-                      onChanged: (value) {
-                        tempTitle = value;
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Enter Title',
-                      ),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          onChanged: (value) {
+                            tempDescription = value;
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Enter Description',
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_selectedImage != null &&
+                                tempTitle.isNotEmpty &&
+                                tempDescription.isNotEmpty) {
+                              _addPost(
+                                  _selectedImage!.path, tempTitle, tempDescription);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Please fill in all fields and select an image.'),
+                                ),
+                              );
+                            }
+                          },
+                          child: Text('Add'),
+                        ),
+                        SizedBox(height: 20),
+                      ],
                     ),
-                    SizedBox(height: 10),
-                    TextFormField(
-                      onChanged: (value) {
-                        tempDescription = value;
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Enter Description',
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_selectedImage != null &&
-                            tempTitle.isNotEmpty &&
-                            tempDescription.isNotEmpty) {
-                          _addPost(
-                              _selectedImage!.path, tempTitle, tempDescription);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Please fill in all fields and select an image.'),
-                            ),
-                          );
-                        }
-                      },
-                      child: Text('Add'),
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             );
           },
         );
       },
     ).whenComplete(() {
-      // Reset the selected image and text fields when the bottom sheet closes
       setState(() {
         _selectedImage = null;
         title = '';
@@ -149,7 +152,7 @@ class _GridConceptState extends State<GridConcept2> {
     });
   }
 
-  void _showdeleteconfirmationdialouge() {
+  void _showdeleteconfirmationdialouge(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -165,7 +168,7 @@ class _GridConceptState extends State<GridConcept2> {
             ),
             TextButton(
               onPressed: () {
-                _deletepost();
+                _deletepost(index);
                 Navigator.of(context).pop();
               },
               child: Text('Yes'),
@@ -176,14 +179,10 @@ class _GridConceptState extends State<GridConcept2> {
     );
   }
 
-  void _deletepost() {
+  void _deletepost(int index) {
     setState(() {
-      final index =
-      posts.indexWhere((post) => post.imageUrl == _selectedImage!.path);
-      if (index >= 0) {
-        posts.removeAt(index);
-        _selectedImage = null;
-      }
+      posts.removeAt(index);
+      _selectedImage = null;
     });
   }
 
@@ -225,40 +224,47 @@ class _GridConceptState extends State<GridConcept2> {
                       children: [
                         Image(
                           image: FileImage(File(posts[index].imageUrl)),
-                          height: 100,
-                          width: 100,
+                          height: 120,
+                          width: 150,
                           fit: BoxFit.cover,
                         ),
                         Text(posts[index].title),
                         Text(posts[index].description),
                       ],
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        _toggleLike(index);
-                      },
-                      child: Icon(
-                        posts[index].isLiked
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: posts[index].isLiked
-                            ? Colors.red
-                            : Colors.grey,
-                        size: 36.0,
+                    Positioned(
+                      top: 120,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          _showdeleteconfirmationdialouge(index);
+                        },
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.blue,
+                          size: 36.0,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          _toggleLike(index);
+                        },
+                        child: Icon(
+                          posts[index].isLiked
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: posts[index].isLiked
+                              ? Colors.red
+                              : Colors.grey,
+                          size: 36.0,
+                        ),
                       ),
                     ),
                   ],
-                ),
-                GestureDetector(
-                  onTap: () {
-                    _selectedImage = File(posts[index].imageUrl);
-                    _showdeleteconfirmationdialouge();
-                  },
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.blue,
-                    size: 36.0,
-                  ),
                 ),
               ],
             ),

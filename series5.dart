@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-void main() {
-  runApp(MyApp());
-}
-
 class PostModel {
   final String imageUrl;
   final String title;
   final String description;
+  bool isLiked; // Added a field to track if the post is liked
 
-  PostModel(this.imageUrl, this.title, this.description);
+  PostModel(this.imageUrl, this.title, this.description, {this.isLiked = false});
 }
 
-class MyApp extends StatelessWidget {
+class MyApp5 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -121,11 +118,13 @@ class _GridConceptState extends State<GridConcept2> {
                         if (_selectedImage != null &&
                             tempTitle.isNotEmpty &&
                             tempDescription.isNotEmpty) {
-                          _addPost(_selectedImage!.path, tempTitle, tempDescription);
+                          _addPost(
+                              _selectedImage!.path, tempTitle, tempDescription);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Please fill in all fields and select an image.'),
+                              content: Text(
+                                  'Please fill in all fields and select an image.'),
                             ),
                           );
                         }
@@ -147,6 +146,50 @@ class _GridConceptState extends State<GridConcept2> {
         title = '';
         description = '';
       });
+    });
+  }
+
+  void _showdeleteconfirmationdialouge() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Delete'),
+          content: Text('Are you sure to delete the pic ?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deletepost();
+                Navigator.of(context).pop();
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deletepost() {
+    setState(() {
+      final index =
+      posts.indexWhere((post) => post.imageUrl == _selectedImage!.path);
+      if (index >= 0) {
+        posts.removeAt(index);
+        _selectedImage = null;
+      }
+    });
+  }
+
+  void _toggleLike(int index) {
+    setState(() {
+      posts[index].isLiked = !posts[index].isLiked;
     });
   }
 
@@ -175,14 +218,48 @@ class _GridConceptState extends State<GridConcept2> {
           return Card(
             child: Column(
               children: [
-                Image(
-                  image: FileImage(File(posts[index].imageUrl)),
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Column(
+                      children: [
+                        Image(
+                          image: FileImage(File(posts[index].imageUrl)),
+                          height: 100,
+                          width: 100,
+                          fit: BoxFit.cover,
+                        ),
+                        Text(posts[index].title),
+                        Text(posts[index].description),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _toggleLike(index);
+                      },
+                      child: Icon(
+                        posts[index].isLiked
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: posts[index].isLiked
+                            ? Colors.red
+                            : Colors.grey,
+                        size: 36.0,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(posts[index].title),
-                Text(posts[index].description),
+                GestureDetector(
+                  onTap: () {
+                    _selectedImage = File(posts[index].imageUrl);
+                    _showdeleteconfirmationdialouge();
+                  },
+                  child: Icon(
+                    Icons.delete,
+                    color: Colors.blue,
+                    size: 36.0,
+                  ),
+                ),
               ],
             ),
           );

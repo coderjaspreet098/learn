@@ -31,8 +31,9 @@ class GridConcept2 extends StatefulWidget {
 class _GridConceptState extends State<GridConcept2> {
   final List<PostModel> posts = [];
   File? _selectedImage;
-  String title = '';
-  String description = '';
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  int? _editingIndex; // Track the index of the item being edited
 
   void _addPost(String imageUrl, String title, String description) {
     setState(() {
@@ -58,9 +59,6 @@ class _GridConceptState extends State<GridConcept2> {
   }
 
   void _showBottomSheet() {
-    String tempTitle = '';
-    String tempDescription = '';
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -88,6 +86,17 @@ class _GridConceptState extends State<GridConcept2> {
                                 fit: BoxFit.cover,
                               ),
                             ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _openGallery();
+                                  },
+                                  child: Text('Change Image'),
+                                ),
+                              ],
+                            ),
                           )
                         else
                           ElevatedButton(
@@ -98,32 +107,34 @@ class _GridConceptState extends State<GridConcept2> {
                           ),
                         SizedBox(height: 10),
                         TextFormField(
-                          onChanged: (value) {
-                            tempTitle = value;
-                          },
+                          controller: titleController,
                           decoration: InputDecoration(
                             hintText: 'Enter Title',
                           ),
                         ),
                         SizedBox(height: 10),
                         TextFormField(
-                          onChanged: (value) {
-                            tempDescription = value;
-                          },
+                          controller: descriptionController,
                           decoration: InputDecoration(
                             hintText: 'Enter Description',
                           ),
                         ),
                         SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: _editingIndex != null
+                              ? _updatePost
+                              : () {
                             if (_selectedImage != null &&
-                                tempTitle.isNotEmpty &&
-                                tempDescription.isNotEmpty) {
+                                titleController.text.isNotEmpty &&
+                                descriptionController.text.isNotEmpty) {
                               _addPost(
-                                  _selectedImage!.path, tempTitle, tempDescription);
+                                _selectedImage!.path,
+                                titleController.text,
+                                descriptionController.text,
+                              );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(
                                 SnackBar(
                                   content: Text(
                                       'Please fill in all fields and select an image.'),
@@ -131,7 +142,9 @@ class _GridConceptState extends State<GridConcept2> {
                               );
                             }
                           },
-                          child: Text('Add'),
+                          child: Text(_editingIndex != null
+                              ? 'Update'
+                              : 'Add'), // Change button text based on mode
                         ),
                         SizedBox(height: 20),
                       ],
@@ -146,8 +159,9 @@ class _GridConceptState extends State<GridConcept2> {
     ).whenComplete(() {
       setState(() {
         _selectedImage = null;
-        title = '';
-        description = '';
+        titleController.clear();
+        descriptionController.clear();
+        _editingIndex = null; // Clear editing mode
       });
     });
   }
@@ -158,7 +172,7 @@ class _GridConceptState extends State<GridConcept2> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Delete'),
-          content: Text('Are you sure to delete the pic ?'),
+          content: Text('Are you sure to delete the pic?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -190,6 +204,35 @@ class _GridConceptState extends State<GridConcept2> {
     setState(() {
       posts[index].isLiked = !posts[index].isLiked;
     });
+  }
+
+  // Edit an existing post
+  void _editPost(int index) {
+    setState(() {
+      _editingIndex = index;
+      _selectedImage = File(posts[index].imageUrl);
+      titleController.text = posts[index].title;
+      descriptionController.text = posts[index].description;
+    });
+    _showBottomSheet();
+  }
+
+  // Update the edited post
+  void _updatePost() {
+    if (_editingIndex != null) {
+      setState(() {
+        posts[_editingIndex!] = PostModel(
+          _selectedImage!.path,
+          titleController.text,
+          descriptionController.text,
+        );
+        _selectedImage = null;
+        titleController.clear();
+        descriptionController.clear();
+        _editingIndex = null; // Clear editing mode
+      });
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -264,6 +307,21 @@ class _GridConceptState extends State<GridConcept2> {
                         ),
                       ),
                     ),
+                    // Add an edit icon for editing the post
+                    Positioned(
+                      top: 10,
+                      left: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          _editPost(index);
+                        },
+                        child: Icon(
+                          Icons.edit,
+                          color: Colors.green,
+                          size: 36.0,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -274,3 +332,89 @@ class _GridConceptState extends State<GridConcept2> {
     );
   }
 }
+
+// Create a separate StatefulWidget for the bottom sheet content
+class BottomSheetContent extends StatefulWidget {
+  final File? selectedImage;
+  final VoidCallback onImageSelected;
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
+  final VoidCallback onAddPressed;
+  final bool isEditing;
+
+  BottomSheetContent({
+    required this.selectedImage,
+    required this.onImageSelected,
+    required this.titleController,
+    required this.descriptionController,
+    required this.onAddPressed,
+    required this.isEditing,
+  });
+
+  @override
+  _BottomSheetContentState createState() => _BottomSheetContentState();
+}
+
+class _BottomSheetContentState extends State<BottomSheetContent> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (widget.selectedImage != null)
+          Container(
+            height: 150,
+            width: 150,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: FileImage(widget.selectedImage!),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    widget.onImageSelected();
+                  },
+                  child: Text('Change Image'),
+                ),
+              ],
+            ),
+          )
+        else
+          ElevatedButton(
+            onPressed: () {
+              widget.onImageSelected();
+            },
+            child: Text('Select Image'),
+          ),
+        SizedBox(height: 10),
+        TextFormField(
+          controller: widget.titleController,
+          decoration: InputDecoration(
+            hintText: 'Enter Title',
+          ),
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          controller: widget.descriptionController,
+          decoration: InputDecoration(
+            hintText: 'Enter Description',
+          ),
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: widget.isEditing
+              ? widget.onAddPressed
+              : () {},
+          child: Text(widget.isEditing ? 'Update' : 'Add'),
+        ),
+        SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+

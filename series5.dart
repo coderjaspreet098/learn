@@ -1,98 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:newproject/series21.dart';
-import 'package:newproject/series22.dart';
-import 'package:newproject/series23.dart';
-import 'series20.dart';
-
-class Demopage extends StatelessWidget {
-  const Demopage({super.key});
-
-  static const apptitle = 'Drawer Example';
+import 'package:google_nav_bar/google_nav_bar.dart';
+class SecondPage extends StatelessWidget {
+  const SecondPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: apptitle,
-      home: Drawerdemo(title: apptitle),
-    );
+    return  secondpage1();
   }
 }
+class secondpage1 extends StatefulWidget {
 
-class Drawerdemo extends StatefulWidget {
-  const Drawerdemo({super.key, required this.title});
-
-  final String title;
+  const secondpage1({super.key});
 
   @override
-  State<Drawerdemo> createState() => _DrawerdemoState();
+  State<secondpage1> createState() => _secondpage1State();
 }
 
-class _DrawerdemoState extends State<Drawerdemo> {
+class _secondpage1State extends State<secondpage1> {
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Drawer'),
+        title: Text('Bottom Navigation Bar Example'),
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: NetworkImage(
-                        'https://images.unsplash.com/photo-1693146604593-f533da0f55ed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDE0NnxibzhqUUtUYUUwWXx8ZW58MHx8fHx8&auto=format&fit=crop&w=500&q=60'),
-                    fit: BoxFit.cover),
-              ),
-              child: Text(
-                'Header',
-                style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
+      body: Center(
+        child: Text(
+          'Page $_currentIndex',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+
+        child: GNav(
+          backgroundColor: Colors.purpleAccent,
+          tabs: [
+            GButton(
+              text: 'Home',
+              icon: Icons.home,
             ),
-            ListTile(
-              title: Text('First'),
-              leading: Icon(Icons.star),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Firstpage()),
-                );
-              },
+            GButton(
+              text: 'Search',
+              icon: Icons.search,
             ),
-            ListTile(
-              title: Text('Second'),
-              leading: Icon(Icons.star),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SecondPage()),
-                );
-              },
+            GButton(
+              text: 'Favorites',
+              icon: Icons.favorite,
             ),
-            ListTile(
-              title: Text('Third'),
-              leading: Icon(Icons.star),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ThirdPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Fourth'),
-              leading: Icon(Icons.star),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => FourthPage()),
-                );
-              },
+            GButton(
+              text: 'Profile',
+              icon: Icons.person,
             ),
           ],
+          selectedIndex: _currentIndex,
+          onTabChange: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
         ),
       ),
     );

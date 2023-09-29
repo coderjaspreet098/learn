@@ -1,67 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-class SecondPage extends StatelessWidget {
-  const SecondPage({super.key});
+import 'package:dio/dio.dart';
+import 'package:untitled/cart_model.dart';
+
+
+class Cartapi extends StatefulWidget {
+  const Cartapi({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return  secondpage1();
-  }
-}
-class secondpage1 extends StatefulWidget {
-
-  const secondpage1({super.key});
-
-  @override
-  State<secondpage1> createState() => _secondpage1State();
+  State<Cartapi> createState() => _CartapiState();
 }
 
-class _secondpage1State extends State<secondpage1> {
-  int _currentIndex = 0;
+class _CartapiState extends State<Cartapi> {
+  CartModel?cartModel;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bottom Navigation Bar Example'),
+        title: Text('AppBar Title'),
       ),
       body: Center(
-        child: Text(
-          'Page $_currentIndex',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-
-        child: GNav(
-          backgroundColor: Colors.purpleAccent,
-          tabs: [
-            GButton(
-              text: 'Home',
-              icon: Icons.home,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('API'),
+            ElevatedButton(
+              onPressed: () {
+               cartproducts();
+              },
+              child: Text('click'),
             ),
-            GButton(
-              text: 'Search',
-              icon: Icons.search,
-            ),
-            GButton(
-              text: 'Favorites',
-              icon: Icons.favorite,
-            ),
-            GButton(
-              text: 'Profile',
-              icon: Icons.person,
-            ),
+            if (cartModel?.carts != null)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cartModel!.carts!.length,
+                  itemBuilder: (context, index) {
+                    final product = cartModel!.carts![index];
+                    return Card(
+                      child: ListTile(
+                        title: Column(
+                          children: [
+                            Text('${product.id}'),
+                            Text('${product.products}'),
+                            Text('${product.total}'),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
-          selectedIndex: _currentIndex,
-          onTabChange: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
         ),
       ),
     );
   }
+
+  void cartproducts() async {
+    print('here');
+    final dio = Dio();
+    final response = await dio.get('https://dummyjson.com/carts');
+    cartModel = CartModel.fromJson(response.data);
+    setState(() {});
+    print(cartModel);
+  }
 }
+
+
+
+
+

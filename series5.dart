@@ -1,50 +1,55 @@
-class MyItem {
-  var id;
-  String? name;
-  int? age;
-  String? otherProperty;
+import 'dart:convert';
 
-  MyItem({
-    this.id,
-    this.name,
-    this.age,
-    this.otherProperty,
-  });
+class User {
+  String name;
+  int age;
 
-  factory MyItem.fromJson(Map<String, dynamic> json) {
-    return MyItem(
-      id: json['id'],
-      name: json['name'],
-      age: json['age'],
-      otherProperty: json['otherProperty'],
-    );
-  }
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{
-      'id': id,
-      'name': name,
-      'age': age,
-      'otherProperty': otherProperty,
-    };
-    return data;
-  }
+  User(this.name, this.age);
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'age': age,
+  };
 }
+
+class Tag {
+  String name;
+  int count;
+
+  Tag(this.name, this.count);
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'count': count,
+  };
+}
+
+class Tutorial {
+  String title;
+  String description;
+  User author;
+  List<Tag> tags;
+
+  Tutorial(this.title, this.description, this.author, this.tags);
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'description': description,
+    'author': author.toJson(),
+    'tags': tags.map((tag) => tag.toJson()).toList(),
+  };
+}
+
 void main() {
-  final myItem = MyItem(
-    id: 1,
-    name: 'Sample Item',
-    age: 25,
-    otherProperty: 'Some value',
-  );
-  
-  final myItemJson = myItem.toJson();
-  print('MyItem JSON: $myItemJson');
-  
-  final parsedMyItem = MyItem.fromJson({
-    'id': 2,
-    'name': 'Another Item',
-    'age': 30,
-    'otherProperty': 'Another value',
-  });
-  print('Parsed MyItem - ID: ${parsedMyItem.id}, Name: ${parsedMyItem.name}, Age: ${parsedMyItem.age}, Other Property: ${parsedMyItem.otherProperty}');
+  User user = User('bezkoder', 21);
+  String jsonUser = jsonEncode(user.toJson());
+  print(jsonUser);
+
+  List<Tag> tags = [Tag('tagA', 3), Tag('tagB', 6), Tag('tagC', 8)];
+  String jsonTags = jsonEncode(tags.map((tag) => tag.toJson()).toList());
+  print(jsonTags);
+
+  Tutorial tutorial = Tutorial('Dart Tut#2', 'Tut#2 Description', user, tags);
+  String jsonTutorial = jsonEncode(tutorial.toJson());
+  print(jsonTutorial);
 }

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:untitled/products_response_model.dart';
 import 'package:dio/dio.dart';
 
+
 class Productbutton extends StatefulWidget {
-  const Productbutton({super.key});
+  const Productbutton({Key? key}) : super(key: key);
 
   @override
   State<Productbutton> createState() => _ProductbuttonState();
@@ -37,7 +38,6 @@ class _ProductbuttonState extends State<Productbutton> {
                         Text(product.title ?? 'Title'),
                         Text(product.description ?? 'Description'),
                         Text('${product.price}'),
-
                       ],
                     ),
                   );
@@ -87,34 +87,46 @@ class _ProductbuttonState extends State<Productbutton> {
     loadProductsAndNavigate();
   }
 
-  void loadProductsAndNavigate() async {
-    final dio = Dio();
-    final response = await dio.get('https://dummyjson.com/products');
-    setState(() {
-      productsResponseModel = ProductsResponseModel.fromJson(response.data);
-    });
+  Future<void> loadProductsAndNavigate() async {
+    try {
+      final dio = Dio();
+      final response = await dio.get('https://dummyjson.com/products');
+      setState(() {
+        productsResponseModel = ProductsResponseModel.fromJson(response.data);
+      });
+    } catch (e) {
+      print('Error loading products: $e');
+    }
   }
 
-  void _addProduct() async {
-    final dio = Dio();
-    final response = await dio.post('https://dummyjson.com/products', data: {
-      'id': _idController.text,
-      'title': _titleController.text,
-      'description': _descriptionController.text,
-      'price': _priceController.text,
+  Future<void> _addProduct() async {
+    try {
+      final dio = Dio();
+      final response1 = await dio.post('https://dummyjson.com/products/add', data: {
+        'id': _idController.text,
+        'title': _titleController.text,
+        'description': _descriptionController.text,
+        'price': _priceController.text,
 
-    });
-    setState(() {
-      response;
-    });
+      });
+      print(response1);
+      if (response1.statusCode == 200) {
+        final addedProduct = ProductsResponseModel.fromJson(response1.data);
+        productsResponseModel!.products!.add(addedProduct.products!.first);
+ 
+      } else {
+        print('Failed to add product: ${response1.statusCode}');
+      }
 
+      _idController.clear();
+      _titleController.clear();
+      _descriptionController.clear();
+      _priceController.clear();
 
-    _idController.clear();
-    _titleController.clear();
-    _descriptionController.clear();
-    _priceController.clear();
-
-    loadProductsAndNavigate();
+      await loadProductsAndNavigate();
+    } catch (e) {
+      print('Error adding product: $e');
+    }
   }
 }
 

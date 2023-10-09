@@ -1,94 +1,120 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled/cart_model.dart';
+import 'package:untitled/products_response_model.dart';
+import 'package:dio/dio.dart';
 
-class Cartapi extends StatefulWidget {
-  const Cartapi({super.key});
+class Productbutton extends StatefulWidget {
+  const Productbutton({super.key});
 
   @override
-  State<Cartapi> createState() => _CartapiState();
+  State<Productbutton> createState() => _ProductbuttonState();
 }
 
-class _CartapiState extends State<Cartapi> {
-  CartModel? cartModel;
+class _ProductbuttonState extends State<Productbutton> {
+  ProductsResponseModel? productsResponseModel;
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AppBar Title'),
+        title: Text('Product Detail'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (cartModel?.carts != null)
-              Expanded(
-                child: ListView.builder(
-                  itemCount: cartModel!.carts!.length,
-                  itemBuilder: (context, index) {
-                    final product = cartModel!.carts![index];
-                    return SizedBox(
-                      height: 300,
-                      child: Card(
-                        child: ListTile(
-                          title: Column(
-                            children: [
-                              Text('${product.id}'),
-                              if (product.products != null)
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: product.products!.length,
-                                    itemBuilder: (context, index) {
-                                      final productlist =
-                                      product.products![index];
-                                      return ListTile(
-                                        title: Text('${productlist.price}'),
-                                        subtitle:
-                                        Text('${productlist.quantity}'),
-                                      );
-                                    },
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+      body: Column(
+        children: [
+          if (productsResponseModel?.products != null)
+            Expanded(
+              child: ListView.builder(
+                itemCount: productsResponseModel!.products!.length,
+                itemBuilder: (context, index) {
+                  final product = productsResponseModel!.products![index];
+                  return ListTile(
+                    title: Column(
+                      children: [
+                        Text('${product.id}'),
+                        Text(product.title ?? 'Title'),
+                        Text(product.description ?? 'Description'),
+                        Text('${product.price}'),
+
+                      ],
+                    ),
+                  );
+                },
               ),
-          ],
-        ),
+            ),
+          _buildAddProductForm(),
+        ],
       ),
     );
   }
 
-  @override
+  Widget _buildAddProductForm() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            controller: _idController,
+            decoration: InputDecoration(labelText: 'ID'),
+          ),
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(labelText: 'Title'),
+          ),
+          TextField(
+            controller: _descriptionController,
+            decoration: InputDecoration(labelText: 'Description'),
+          ),
+          TextField(
+            controller: _priceController,
+            decoration: InputDecoration(labelText: 'Price'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _addProduct();
+            },
+            child: Text('Add Product'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void initState() {
     super.initState();
-    createCart();
+    loadProductsAndNavigate();
   }
 
-  void createCart() async {
+  void loadProductsAndNavigate() async {
     final dio = Dio();
+    final response = await dio.get('https://dummyjson.com/products');
+    setState(() {
+      productsResponseModel = ProductsResponseModel.fromJson(response.data);
+    });
+  }
 
-    try {
-      final response1 = await dio.post('https://dummyjson.com/carts', data: cartModel?.toJson());
+  void _addProduct() async {
+    final dio = Dio();
+    final response = await dio.post('https://dummyjson.com/products', data: {
+      'id': _idController.text,
+      'title': _titleController.text,
+      'description': _descriptionController.text,
+      'price': _priceController.text,
 
-      if (response1.statusCode == 200) {
-        print('Cart created successfully.');
-        setState(() {
-          cartModel = CartModel.fromJson(response1.data);
-        });
-      } else {
-        print('Failed to create cart. Status code: ${response1.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
+    });
+    setState(() {
+      response;
+    });
+
+
+    _idController.clear();
+    _titleController.clear();
+    _descriptionController.clear();
+    _priceController.clear();
+
+    loadProductsAndNavigate();
   }
 }
-
 

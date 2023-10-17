@@ -1,132 +1,99 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:untitled/products_response_model.dart';
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+import 'package:untitled/getreq_model.dart';
+import 'package:untitled/rest1.dart';
 
-
-class Productbutton extends StatefulWidget {
-  const Productbutton({Key? key}) : super(key: key);
+class GetResponse extends StatefulWidget {
+  const GetResponse({Key? key}) : super(key: key);
 
   @override
-  State<Productbutton> createState() => _ProductbuttonState();
+  _GetResponseState createState() => _GetResponseState();
 }
 
-class _ProductbuttonState extends State<Productbutton> {
-  ProductsResponseModel? productsResponseModel;
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
+class _GetResponseState extends State<GetResponse> {
+  List<Data> userList = [];
+  bool isLoading = false;
+  int page = 1;
+
+  Future<List<Data>> getUserApi() async {
+    print(page);
+    final response = await http.get(Uri.parse('https://reqres.in/api/users?page=$page'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      if (responseData.containsKey('data') && responseData['data'] is List) {
+        final List<dynamic> userListData = responseData['data'];
+        userList.addAll(userListData.map((userData) => Data.fromJson(userData)));
+        page++;
+        return userList;
+      } else {
+        throw Exception('Invalid data format from the API');
+      }
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    ScrollController _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent == _scrollController.position.pixels && !isLoading) {
+        isLoading = true;
+
+        getUserApi().then((newData) {
+          setState(() {
+            isLoading = false;
+          });
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Detail'),
+        title: Text('Fetch data using API with Pagination'),
       ),
       body: Column(
         children: [
-          if (productsResponseModel?.products != null)
-            Expanded(
-              child: ListView.builder(
-                itemCount: productsResponseModel!.products!.length,
-                itemBuilder: (context, index) {
-                  final product = productsResponseModel!.products![index];
-                  return ListTile(
-                    title: Column(
-                      children: [
-                        Text('${product.id}'),
-                        Text(product.title ?? 'Title'),
-                        Text(product.description ?? 'Description'),
-                        Text('${product.price}'),
-                      ],
-                    ),
+          Expanded(
+            child: FutureBuilder(
+              future: getUserApi(),
+              builder: (context, AsyncSnapshot<List<Data>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: userList.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        color: Colors.yellowAccent,
+                        //decoration: BoxDecoration(),
+                        height: 100,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen,),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text('Id'),
+                              Text(userList[index].id.toString()),
+                            ],
+                          ),
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => Restapi(restdata: userList[index])));
+                          },
+                        ),
+                      );
+                    },
                   );
-                },
-              ),
+                }
+              },
             ),
-          _buildAddProductForm(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddProductForm() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _idController,
-            decoration: InputDecoration(labelText: 'ID'),
-          ),
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(labelText: 'Title'),
-          ),
-          TextField(
-            controller: _descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
-          ),
-          TextField(
-            controller: _priceController,
-            decoration: InputDecoration(labelText: 'Price'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _addProduct();
-            },
-            child: Text('Add Product'),
           ),
         ],
       ),
     );
-  }
-
-  void initState() {
-    super.initState();
-    loadProductsAndNavigate();
-  }
-
-  Future<void> loadProductsAndNavigate() async {
-    try {
-      final dio = Dio();
-      final response = await dio.get('https://dummyjson.com/products');
-      setState(() {
-        productsResponseModel = ProductsResponseModel.fromJson(response.data);
-      });
-    } catch (e) {
-      print('Error loading products: $e');
-    }
-  }
-
-  Future<void> _addProduct() async {
-    try {
-      final dio = Dio();
-      final response1 = await dio.post('https://dummyjson.com/products/add', data: {
-        'id': _idController.text,
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'price': _priceController.text,
-
-      });
-      print(response1);
-      if (response1.statusCode == 200) {
-        final addedProduct = ProductsResponseModel.fromJson(response1.data);
-        productsResponseModel!.products!.add(addedProduct.products!.first);
- 
-      } else {
-        print('Failed to add product: ${response1.statusCode}');
-      }
-
-      _idController.clear();
-      _titleController.clear();
-      _descriptionController.clear();
-      _priceController.clear();
-
-      await loadProductsAndNavigate();
-    } catch (e) {
-      print('Error adding product: $e');
-    }
   }
 }
-

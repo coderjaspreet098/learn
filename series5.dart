@@ -14,8 +14,12 @@ class CartController extends GetxController {
       );
       if (response.statusCode == 200) {
         print(response.body);
-        // Remove the deleted item from the cartList
-        cartList.removeWhere((cart) => cart.carts!.any((c) => c.id == id));
+        // Find the index of the cart item to delete from the cartList
+        final index = cartList.indexWhere((cart) => cart.carts!.any((c) => c.id == id));
+        if (index != -1) {
+          // Remove the cart item from the cartList
+          cartList.removeAt(index);
+        }
         update();
       } else {
         print('Cart not deleted');
@@ -46,17 +50,18 @@ class CartController extends GetxController {
 
       if (response.statusCode == 200) {
         print('Data updated');
-        // You can update the cartList here if needed
-        // Find the cart item and update its values
-        var updatedCart = cartList.firstWhere(
+        // Update the cart item in the cartList
+        final cartToUpdate = cartList.firstWhere(
           (cart) => cart.carts!.any((c) => c.id == id),
           orElse: () => null,
         );
-        if (updatedCart != null) {
-          updatedCart.total = totalController.text;
-          updatedCart.discountedTotal = discountedtotalController.text;
-          updatedCart.userId = userIdController.text;
+
+        if (cartToUpdate != null) {
+          cartToUpdate.total = totalController.text;
+          cartToUpdate.discountedTotal = discountedtotalController.text;
+          cartToUpdate.userId = userIdController.text;
         }
+
         update();
       } else {
         print('Response status code not 200');

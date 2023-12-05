@@ -1,75 +1,63 @@
-class CartController extends GetxController {
-  // ... other code ...
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
-  Future<void deleteCartData(String id) async {
-    var token = 'token_id';
+class ForgotPasswordScreen extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+
+  Future<void> resetPassword(String email) async {
     try {
-      var response = await http.delete(
-        Uri.parse('https://dummyjson.com/carts/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      if (response.statusCode == 200) {
-        print(response.body);
-        // Find the index of the cart item to delete from the cartList
-        final index = cartList.indexWhere((cart) => cart.carts!.any((c) => c.id == id));
-        if (index != -1) {
-          // Remove the cart item from the cartList
-          cartList.removeAt(index);
-        }
-        update();
-      } else {
-        print('Cart not deleted');
-      }
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      Get.snackbar('Password Reset Email Sent', 'Please check your email to reset your password',
+          snackPosition: SnackPosition.TOP);
     } catch (e) {
-      print(e);
+      print('Error sending reset email: $e');
+      Get.snackbar('Password Reset Failed', 'Please try again',
+          snackPosition: SnackPosition.TOP);
     }
   }
 
-  Future<void updateUserData(String id) async {
-    var token = 'token_id';
-    try {
-      var body = {
-        'total': totalController.text,
-        'discountedTotal': discountedtotalController.text,
-        'userId': userIdController.text,
-      };
-
-      var response = await http.put(
-        Uri.parse('https://dummyjson.com/carts/$id'),
-        body: jsonEncode(body),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        print('Data updated');
-        // Update the cart item in the cartList
-        final cartToUpdate = cartList.firstWhere(
-          (cart) => cart.carts!.any((c) => c.id == id),
-          orElse: () => null,
-        );
-
-        if (cartToUpdate != null) {
-          cartToUpdate.total = totalController.text;
-          cartToUpdate.discountedTotal = discountedtotalController.text;
-          cartToUpdate.userId = userIdController.text;
-        }
-
-        update();
-      } else {
-        print('Response status code not 200');
-      }
-    } catch (e) {
-      print(e);
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Forgot Password'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextFormField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Enter your email',
+                prefixIcon: Icon(Icons.email),
+              ),
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty || !value.contains('@')) {
+                  return 'Please enter a valid email address';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                final email = emailController.text.trim();
+                if (email.isNotEmpty) {
+                  resetPassword(email);
+                } else {
+                  Get.snackbar('Email Required', 'Please enter your email',
+                      snackPosition: SnackPosition.TOP);
+                }
+              },
+              child: Text('Reset Password'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
-  // ... other code ...
 }
